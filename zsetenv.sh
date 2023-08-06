@@ -1,1 +1,0 @@
-source ~/source/ncs/zephyr/zephyr-env.sh
