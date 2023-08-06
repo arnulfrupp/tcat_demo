@@ -1,46 +1,38 @@
-Fork of https://github.com/arnulfrupp/ThreadBleSecure
+# Environment setup:
 
-Environment setup:
-==================
-https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/getting_started/installing.html
+https://developer.nordicsemi.com/nRF\_Connect\_SDK/doc/latest/nrf/getting\_started/installing.html
 
-Init repo:
-==========
+Replace:
+west init -m https://github.com/nrfconnect/sdk-nrf --mr main
+With:
+west init -m https://github.com/arnulfrupp/sdk-nrf.git --mr bbtc\_main
 
-```
-west init -m https://github.com/ --mr main my-workspace
-```
-
-Build:
-======
+# Clone repo:
 
 ```
-cd my-workspace
-west build -b <board> ThreadBleSecure-ncs
+mkdir tcat_demo
+cd tcat_demo
+git clone https://github.com/arnulfrupp/tcat_demo.git
 ```
 
-Flashing board:
-===============
-- boards containing jlink eg. Nordic nRF52840dk
+# Build:
+* Run ./zsetenv.sh to set environment variables
 
-    ```
-    west flash
-    ```
+```
+west build -b <board>
+```
 
-- boadrs with usb flasher eg. Nordic nRF52840dongle
+# Flashing board:
 
-    ```
-    nrfutil pkg generate --hw-version 52 --sd-req=0x00 --application build/zephyr/zephyr.hex --application-version 1 zephyr.zip && nrfutil dfu usb-serial -pkg zephyr.zip -p <serial-port> && rm -f zephyr.zip
-    ```
+* boards containing jlink eg. Nordic nRF52840dk
 
+```
+west flash
+```
 
-Install nrfutil (of not done already)
-=====================================
+* boards with usb flasher eg. Nordic nRF52840dongle
+* In zflash.sh replace '/dev/ttyACM0' with your serial port
 
-https://www.nordicsemi.com/Products/Development-tools/nrf-util
-
-    ```
-    sudo usermod -a -G dialout <username>
-    <reboot>
-    ```
-
+```
+./zflash.sh
+```
