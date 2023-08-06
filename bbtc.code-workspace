@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../ncs/modules/lib/openthread"
+		}
+	],
+	"settings": {
+		"nrf-connect.toolchain.path": "PATH",
+		"nrf-connect.applications": [
+			"${workspaceFolder}"
+		]
+	}
+}
