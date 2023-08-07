@@ -94,7 +94,7 @@ void HandleBleSecureClientConnect(otInstance *aInstance, bool aConnected, bool a
 	}
 }
 
-void HandleBleSecureReceive(otInstance *aInstance, otMessage *aMessage, otTcatMessageType aTcatMessageType, const char* aServiceName, void *aContext)
+void HandleBleSecureReceive(otInstance *aInstance, const otMessage *aMessage, otTcatMessageType aTcatMessageType, const char* aServiceName, void *aContext)
 {
 	uint16_t nLen;
 	char buf[100];
