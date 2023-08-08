@@ -69,28 +69,33 @@ void HandleBleSecureClientConnect(otInstance *aInstance, bool aConnected, bool a
 		char buf[20];
 		size_t len;
 
+		len = sizeof(buf) - 1;
 		otBleSecureGetPeerSubjectAttributeByOid(aInstance, MBEDTLS_OID_AT_CN,
-							sizeof(MBEDTLS_OID_AT_CN) - 1, buf, &len,
-							sizeof(buf) - 1, NULL);
+							sizeof(MBEDTLS_OID_AT_CN) - 1, buf, &len, NULL);
 
 		buf[len] = 0;
 		LOG_INF("Peer cert. Common Name:%s", buf);
 
-		otBleSecureGetThreadAttributeFromPeerCertificate(aInstance, 3, buf, &len,
-								 sizeof(buf));
+		len = sizeof(buf);
+		otBleSecureGetThreadAttributeFromPeerCertificate(aInstance, 3, buf, &len);
 		if (len > 0) 
 		{
 			LOG_INF("Peer OID 1.3.6.1.4.1.44970.3: %02X%02X%02X%02X%02X (len = %d)",
 				buf[0], buf[1], buf[2], buf[3], buf[4], len);
 		}
 
-		otBleSecureGetThreadAttributeFromOwnCertificate(aInstance, 3, buf, &len,
-								sizeof(buf));
+		len = sizeof(buf);
+		otBleSecureGetThreadAttributeFromOwnCertificate(aInstance, 3, buf, &len);
 		if (len > 0) 
 		{
 			LOG_INF("Own OID 1.3.6.1.4.1.44970.3: %02X%02X%02X%02X%02X (len = %d)",
 				buf[0], buf[1], buf[2], buf[3], buf[4], len);
 		}
+
+		LOG_INF("Command class commissioning authorized: %s", otBleSecureIsCommandClassAuthorized(aInstance, OT_TCAT_COMMAND_CLASS_COMMISSIONING) ? "YES" : " NO");
+		LOG_INF("Command class extraxtion authorized: %s", otBleSecureIsCommandClassAuthorized(aInstance, OT_TCAT_COMMAND_CLASS_EXTRACTION) ? "YES" : " NO");
+		LOG_INF("Command class de-commissioning authorized: %s", otBleSecureIsCommandClassAuthorized(aInstance, OT_TCAT_COMMAND_CLASS_DECOMMISSIONING) ? "YES" : " NO");
+		LOG_INF("Command class application authorized: %s", otBleSecureIsCommandClassAuthorized(aInstance, OT_TCAT_COMMAND_CLASS_APPLICATION) ? "YES" : " NO");
 	}
 }
 
