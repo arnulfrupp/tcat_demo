@@ -35,9 +35,13 @@
 // Zephyr OpenThread integration Library
 #include <zephyr/net/openthread.h>
 
+
 // OpenThread API
 #include <openthread/platform/ble.h>
 #include <openthread/ble_secure.h>
+
+#include <openthread/coap.h>
+#include <openthread/coap_secure.h>
 
 // Mbed TLS
 #include <mbedtls/oid.h>
@@ -48,6 +52,8 @@ LOG_MODULE_REGISTER(tcat_cli_sample, CONFIG_OT_COMMAND_LINE_INTERFACE_LOG_LEVEL)
 
 struct openthread_context *myOpenThreadContext;
 otInstance *myOpenThreadInstance = NULL;
+
+otTcatVendorInfo myVendorInfo = { .mVendorName = "My Vendor", .mPskdString = "SECRET"};
 
 // BleSecure callback functions
 
@@ -99,16 +105,16 @@ void HandleBleSecureClientConnect(otInstance *aInstance, bool aConnected, bool a
 	}
 }
 
-void HandleBleSecureReceive(otInstance *aInstance, const otMessage *aMessage, otTcatMessageType aTcatMessageType, const char* aServiceName, void *aContext)
+void HandleBleSecureReceive(otInstance *aInstance, const otMessage *aMessage, int32_t aOffset, otTcatMessageType aTcatMessageType, const char *aServiceName, void *aContext)
 {
 	uint16_t nLen;
 	char buf[100];
 
 	LOG_INF("TLS Data Received len:%d offset:%d", (int)otMessageGetLength(aMessage),
-		(int)otMessageGetOffset(aMessage));
+		(int)aOffset);
 
-	//nLen = otMessageGetLength(aMessage) - otMessageGetOffset(aMessage);
-	nLen = otMessageRead(aMessage, otMessageGetOffset(aMessage), buf + 5, sizeof(buf) - 6);
+	//nLen = otMessageGetLength(aMessage) - aOffset;
+	nLen = otMessageRead(aMessage, aOffset, buf + 5, sizeof(buf) - 6);
 	buf[nLen + 5] = 0;
 
 	LOG_INF("Received:%s", buf + 5);
@@ -122,7 +128,6 @@ int main(void)
 {
 	myOpenThreadContext = openthread_get_default_context();
 	myOpenThreadInstance = myOpenThreadContext->instance;
-	otTcatVendorInfo myVendorInfo = { .mVendorName = "My Vendor", .mPskdString = "SECRET"};
 
 #if DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_shell_uart), zephyr_cdc_acm_uart)
 
@@ -161,14 +166,33 @@ int main(void)
 	(void)uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
 #endif
 
-	otBleSecureSetCertificate(myOpenThreadInstance, (const uint8_t *)(OT_CLI_BBTC_X509_CERT),
-				  sizeof(OT_CLI_BBTC_X509_CERT),
-				  (const uint8_t *)(OT_CLI_BBTC_PRIV_KEY),
-				  sizeof(OT_CLI_BBTC_PRIV_KEY));
+	// TEST TEST TEST  ---->
+	otCoapResource res1;
+	otCoapResource res2;
+
+	res1.mUriPath = "dali/d";
+	res1.mHandler = NULL;
+	res1.mNext = NULL;
+	res1.mContext = NULL;
+	res2.mUriPath = "dali/e";
+	res2.mHandler = NULL;
+	res2.mNext = NULL;
+	res2.mContext = NULL;
+
+
+	LOG_INF("otCoapStart(): %s", otCoapStart(myOpenThreadInstance, OT_DEFAULT_COAP_PORT) == OT_ERROR_NONE ? "OK" : "FAIL");
+	otCoapSecureSetPsk(myOpenThreadInstance, "SECRET", 6, "12345678", 8);
+    otCoapSecureSetSslAuthMode(myOpenThreadInstance, false);
+	// <---- TEST TEST TEST
+
+	otBleSecureSetCertificate(myOpenThreadInstance, (const uint8_t *)(OT_CLI_TCAT_X509_CERT),
+				  sizeof(OT_CLI_TCAT_X509_CERT),
+				  (const uint8_t *)(OT_CLI_TCAT_PRIV_KEY),
+				  sizeof(OT_CLI_TCAT_PRIV_KEY));
 
 	otBleSecureSetCaCertificateChain(myOpenThreadInstance,
-					 (const uint8_t *)(OT_CLI_BBTC_TRUSTED_ROOT_CERTIFICATE),
-					 sizeof(OT_CLI_BBTC_TRUSTED_ROOT_CERTIFICATE));
+					 (const uint8_t *)(OT_CLI_TCAT_TRUSTED_ROOT_CERTIFICATE),
+					 sizeof(OT_CLI_TCAT_TRUSTED_ROOT_CERTIFICATE));
 
 	otBleSecureSetSslAuthMode(myOpenThreadInstance, true);
 
